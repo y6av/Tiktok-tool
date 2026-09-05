@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>TikTok Username Generator — iPhone</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#080a10;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;padding:16px}
+.app{max-width:680px;margin:auto}
+h1{font-size:27px;margin:8px 0}.sub{color:#a6adba;font-size:14px;margin-bottom:18px}
+.card{background:#12151d;border:1px solid #292e3a;border-radius:20px;padding:16px;margin-bottom:12px}
+label{display:block;color:#a6adba;font-size:13px;margin-bottom:7px}
+select,input,button{font:inherit;min-height:48px;border-radius:13px;border:1px solid #303643}
+select,input{width:100%;background:#0c0f15;color:#fff;padding:11px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{width:100%;padding:10px 12px;background:#202530;color:#fff;font-weight:700;touch-action:manipulation}
+.primary{margin-top:12px;background:#25f4ee;color:#071013;border:0}
+.danger{margin-top:8px}
+.notice{font-size:12px;line-height:1.6;color:#cbd0da;background:#19131a;border-right:3px solid #fe2c55;padding:10px;border-radius:8px}
+.stats{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.pill{font-size:12px;background:#1b202a;border:1px solid #303643;border-radius:99px;padding:7px 10px}
+#list{display:grid;gap:8px;margin-top:12px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0d1016;border:1px solid #292e3a;border-radius:13px;padding:9px}
+.name{font-family:ui-monospace,Menlo,monospace;direction:ltr;font-size:15px}
+.actions{display:flex;gap:6px}.actions button{width:auto;min-height:38px;padding:6px 9px;font-size:12px}
+.empty{text-align:center;color:#8f97a5;padding:24px 5px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>⚡ TikTok Username Generator</h1>
+<div class="sub">نسخة محسّنة للآيفون — تعمل بدون مكتبات أو ملفات خارجية.</div>
+
+<div class="card">
+<div class="grid">
+<div><label>النمط</label>
+<select id="pattern">
+<option value="3">ثلاثي — abc</option>
+<option value="near3">شبه ثلاثي — a_bc / ab.c</option>
+<option value="4">رباعي — abcd</option>
+<option value="custom">مخصص</option>
+</select></div>
+<div><label>العدد</label><input id="count" type="number" inputmode="numeric" min="1" max="500" value="50"></div>
+</div>
+
+<div id="customBox" class="hidden" style="margin-top:10px">
+<label>القالب: A = حرف، 0 = رقم</label>
+<input id="custom" autocapitalize="characters" placeholder="مثال: AA0A">
+</div>
+
+<div class="grid" style="margin-top:10px">
+<div><label>المجموعة</label>
+<select id="chars">
+<option value="letters">حروف فقط</option>
+<option value="lowernum">حروف + أرقام</option>
+</select></div>
+<div><label>التوليد</label>
+<select id="mode">
+<option value="random">عشوائي</option>
+<option value="sequence">تسلسلي</option>
+</select></div>
+</div>
+
+<button type="button" class="primary" id="generate">توليد اليوزرات</button>
+<button type="button" class="danger" id="clear">مسح النتائج</button>
+</div>
+
+<div class="card">
+<div class="notice">
+هذه الأداة تولّد التركيبات فقط. لا تنفذ فحصًا آليًا كثيفًا على TikTok ولا تتجاوز الحماية أو حدود الطلبات. استخدم «فتح» للتحقق يدويًا.
+</div>
+<div class="stats">
+<span class="pill">النتائج: <b id="total">0</b></span>
+<span class="pill">المفتوحة: <b id="opened">0</b></span>
+</div>
+<div id="list"><div class="empty">اضغط «توليد اليوزرات» لبدء التوليد.</div></div>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var generated=[];
+var opened=0;
+
+function byId(id){return document.getElementById(id);}
+function randomChar(chars){return chars.charAt(Math.floor(Math.random()*chars.length));}
+function alphabet(){
+  return byId("chars").value==="lowernum"
+    ?"abcdefghijklmnopqrstuvwxyz0123456789"
+    :"abcdefghijklmnopqrstuvwxyz";
+}
+function makeUsername(pattern){
+  var a=alphabet(), s="";
+  if(pattern==="3") return randomChar(a)+randomChar(a)+randomChar(a);
+  if(pattern==="4") return randomChar(a)+randomChar(a)+randomChar(a)+randomChar(a);
+  if(pattern==="near3"){
+    var type=Math.floor(Math.random()*4);
+    if(type===0) return randomChar(a)+"_"+randomChar(a)+randomChar(a);
+    if(type===1) return randomChar(a)+randomChar(a)+"_"+randomChar(a);
+    if(type===2) return randomChar(a)+"."+randomChar(a)+randomChar(a);
+    return randomChar(a)+randomChar(a)+"."+randomChar(a);
+  }
+  var t=byId("custom").value.trim().toUpperCase();
+  if(!/^[A0]+$/.test(t)) return null;
+  for(var i=0;i<t.length;i++) s+=t.charAt(i)==="A"?randomChar("abcdefghijklmnopqrstuvwxyz"):randomChar("0123456789");
+  return s;
+}
+function generate(){
+  var target=parseInt(byId("count").value,10);
+  if(!isFinite(target)||target<1) target=50;
+  if(target>500) target=500;
+  var pattern=byId("pattern").value;
+  var set=new Set(), guard=0;
+
+  if(byId("mode").value==="sequence" && (pattern==="3"||pattern==="4")){
+    var a=alphabet(), len=parseInt(pattern,10);
+    var max=Math.min(Math.pow(a.length,len),target);
+    for(var n=0;n<max;n++){
+      var x=n, out="";
+      for(var j=0;j<len;j++){out=a.charAt(x%a.length)+out;x=Math.floor(x/a.length);}
+      set.add(out);
+    }
+  }else{
+    while(set.size<target && guard<target*50){
+      set.add(makeUsername(pattern)); guard++;
+    }
+    set.delete(null);
+  }
+  generated=Array.from(set);
+  byId("total").textContent=generated.length;
+  render();
+}
+function render(){
+  var list=byId("list");
+  list.innerHTML="";
+  if(!generated.length){list.innerHTML='<div class="empty">لا توجد نتائج.</div>';return;}
+  generated.forEach(function(u){
+    var item=document.createElement("div"); item.className="item";
+    var name=document.createElement("span"); name.className="name"; name.textContent="@"+u;
+    var actions=document.createElement("div"); actions.className="actions";
+
+    var copy=document.createElement("button"); copy.type="button"; copy.textContent="نسخ";
+    copy.addEventListener("click",function(){
+      var text="@"+u;
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){
+          copy.textContent="تم ✓"; setTimeout(function(){copy.textContent="نسخ";},900);
+        }).catch(function(){fallbackCopy(text,copy);});
+      }else fallbackCopy(text,copy);
+    });
+
+    var open=document.createElement("button"); open.type="button"; open.textContent="فتح";
+    open.addEventListener("click",function(){
+      opened++; byId("opened").textContent=opened;
+      window.location.href="https://www.tiktok.com/@"+encodeURIComponent(u);
+    });
+
+    actions.appendChild(copy); actions.appendChild(open);
+    item.appendChild(name); item.appendChild(actions); list.appendChild(item);
+  });
+}
+function fallbackCopy(text,button){
+  var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand("copy");button.textContent="تم ✓";setTimeout(function(){button.textContent="نسخ";},900);}catch(e){}
+  document.body.removeChild(ta);
+}
+byId("pattern").addEventListener("change",function(){
+  byId("customBox").classList.toggle("hidden",this.value!=="custom");
+});
+byId("generate").addEventListener("click",generate);
+byId("clear").addEventListener("click",function(){
+  generated=[];opened=0;byId("total").textContent="0";byId("opened").textContent="0";
+  byId("list").innerHTML='<div class="empty">تم مسح النتائج.</div>';
+});
+})();
+</script>
+</body>
+</html>
